@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.agents import create_openai_functions_agent,AgentExecutor
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain.tools.retreiver import create_retriever_tool
+from langchain.tools.retriever import create_retriever_tool
 
 from langchain.chains import HumanMessage,AIMessage
 from langchain_community.document_loaders import WebBaseLoader
@@ -20,9 +20,9 @@ splitter = RecursiveCharacterTextSplitter(
     chunk_size=400, #Changed for improving model's performance
     chunk_overlap = 20
 )
-splitDocs = splitter.split_documents(docs)
+splitDocs = splitter.split_documents(docs) #Split the document into chunks of data
 embeddings = OpenAIEmbeddings()
-vectorStore = FAISS.from_documents(docs,embedding=embeddings)
+vectorStore = FAISS.from_documents(docs,embedding=embeddings) #Create a VectorStore for the doc
 retriever = vectorStore.as_retriever(search_kwargs={"k":3}) #Changed to increase the amount of answers provided
     
 
@@ -47,20 +47,20 @@ retriever_tools = create_retriever_tool(
     "lcel_search",
     "Use this tool when searching for langchain expression language (LCEL)"
 )
-tools = [search, retriever_tools]
+tools = [search, retriever_tools] #A list of tools, for searching and retrieving
 
-agent = create_openai_functions_agent(
+agent = create_openai_functions_agent( #This is where the agent is created!
     llm=model,
     prompt=prompt,
     tools=tools
 )
 
-agentExecutor = AgentExecutor(
+agentExecutor = AgentExecutor( #Initialize the agent. Necessary! 
     agent=agent,
     tools=tools
 )
 
-def process_chat(agentExecutor, user_input,chat_history): 
+def process_chat(agentExecutor, user_input,chat_history): #Uses the agent executor to create a response
     response = agentExecutor.invoke({
         "input":user_input,
         "chat_history":chat_history
